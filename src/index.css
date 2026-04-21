@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 228 71% 99%;
+    --foreground: 233 31% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 233 31% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 233 31% 7%;
+    --primary: 252 94% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 231 20% 27%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 231 67% 95%;
+    --muted-foreground: 231 20% 61%;
+    --accent: 231 67% 95%;
+    --accent-foreground: 233 31% 7%;
+    --destructive: 0 83% 63%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 231 67% 95%;
+    --input: 231 67% 95%;
+    --ring: 252 94% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 233 30% 11%;
+    --foreground: 0 0% 100%;
+    --card: 234 25% 17%;
+    --card-foreground: 0 0% 100%;
+    --popover: 234 25% 17%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 252 94% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 233 30% 21%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 233 30% 21%;
+    --muted-foreground: 231 20% 61%;
+    --accent: 233 30% 21%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 83% 63%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 233 30% 21%;
+    --input: 233 30% 21%;
+    --ring: 252 94% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-invoice-bg-light text-invoice-text-light antialiased;
+    font-family: 'League Spartan', sans-serif;
+  }
+  body.dark {
+    @apply bg-invoice-bg-dark text-invoice-text-dark;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #DFE3FA transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #DFE3FA;
+    border-radius: 3px;
+  }
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #252945;
+  }
+}
+
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
