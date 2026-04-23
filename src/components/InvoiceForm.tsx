@@ -107,34 +107,40 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
 
   const validate = useCallback((): boolean => {
     const newErrors: FormErrors = {};
+    let hasEmptyFields = false;
 
-    if (!senderStreet.trim()) newErrors.senderStreet = 'required';
-    if (!senderCity.trim()) newErrors.senderCity = 'required';
-    if (!senderPostCode.trim()) newErrors.senderPostCode = 'required';
-    if (!senderCountry.trim()) newErrors.senderCountry = 'required';
+    if (!senderStreet.trim()) { newErrors.senderStreet = "can't be empty"; hasEmptyFields = true; }
+    if (!senderCity.trim()) { newErrors.senderCity = "can't be empty"; hasEmptyFields = true; }
+    if (!senderPostCode.trim()) { newErrors.senderPostCode = "can't be empty"; hasEmptyFields = true; }
+    if (!senderCountry.trim()) { newErrors.senderCountry = "can't be empty"; hasEmptyFields = true; }
 
-    if (!clientName.trim()) newErrors.clientName = 'required';
+    if (!clientName.trim()) { newErrors.clientName = "can't be empty"; hasEmptyFields = true; }
     if (!clientEmail.trim()) {
-      newErrors.clientEmail = 'required';
+      newErrors.clientEmail = "can't be empty";
+      hasEmptyFields = true;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
       newErrors.clientEmail = 'invalid email';
     }
-    if (!clientStreet.trim()) newErrors.clientStreet = 'required';
-    if (!clientCity.trim()) newErrors.clientCity = 'required';
-    if (!clientPostCode.trim()) newErrors.clientPostCode = 'required';
-    if (!clientCountry.trim()) newErrors.clientCountry = 'required';
+    if (!clientStreet.trim()) { newErrors.clientStreet = "can't be empty"; hasEmptyFields = true; }
+    if (!clientCity.trim()) { newErrors.clientCity = "can't be empty"; hasEmptyFields = true; }
+    if (!clientPostCode.trim()) { newErrors.clientPostCode = "can't be empty"; hasEmptyFields = true; }
+    if (!clientCountry.trim()) { newErrors.clientCountry = "can't be empty"; hasEmptyFields = true; }
 
-    if (!invoiceDate) newErrors.invoiceDate = 'required';
-    if (!description.trim()) newErrors.description = 'required';
+    if (!invoiceDate) { newErrors.invoiceDate = "can't be empty"; hasEmptyFields = true; }
+    if (!description.trim()) { newErrors.description = "can't be empty"; hasEmptyFields = true; }
 
     if (items.length === 0) {
-      newErrors.items = 'An item must be added';
+      newErrors.items = '- An item must be added';
     } else {
       items.forEach((item, index) => {
-        if (!item.name.trim()) newErrors[`itemName_${index}`] = "can't be empty";
-        if (item.quantity <= 0) newErrors[`itemQty_${index}`] = "can't be empty";
-        if (item.price < 0) newErrors[`itemPrice_${index}`] = "can't be empty";
+        if (!item.name.trim()) { newErrors[`itemName_${index}`] = "can't be empty"; hasEmptyFields = true; }
+        if (item.quantity <= 0) { newErrors[`itemQty_${index}`] = "can't be empty"; hasEmptyFields = true; }
+        if (item.price < 0) { newErrors[`itemPrice_${index}`] = "can't be empty"; hasEmptyFields = true; }
       });
+    }
+
+    if (hasEmptyFields) {
+      newErrors.general = '- All fields must be added';
     }
     
     setErrors(newErrors);
@@ -354,10 +360,10 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
             </Field>
             <Field label="Payment Terms" error={errors.paymentTerms}>
               <Select value={String(paymentTerms)} onValueChange={(val) => setPaymentTerms(Number(val))}>
-                <SelectTrigger className={cn(inputClass(), "flex items-center justify-between h-auto [&>svg]:text-primary [&>svg]:opacity-100")}>
+                <SelectTrigger className={cn(inputClass(errors.paymentTerms), "flex items-center justify-between h-auto [&>svg]:text-primary [&>svg]:opacity-100")}>
                   <SelectValue placeholder="Select Payment Terms" />
                 </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-[#252945] rounded-lg border-none shadow-card z-50">
+                <SelectContent position="popper" className="bg-white dark:bg-[#252945] rounded-lg border-none shadow-card z-50">
                   {paymentTermsOptions.map((opt) => (
                     <SelectItem
                       key={opt.value}
@@ -470,8 +476,6 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
             </div>
           ))}
 
-          {errors.items && <p className="mb-4 text-sm text-destructive">{errors.items}</p>}
-
           <Button
             onClick={addItem}
             variant="secondary"
@@ -480,6 +484,13 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
             <Plus className="mr-2 h-4 w-4" />
             Add New Item
           </Button>
+
+          {(errors.general || errors.items) && (
+            <div className="mt-8 flex flex-col items-start gap-1">
+              {errors.general && <p className="text-[10px] font-semibold text-destructive">{errors.general}</p>}
+              {errors.items && <p className="text-[10px] font-semibold text-destructive">{errors.items}</p>}
+            </div>
+          )}
         </section>
       </div>
 
