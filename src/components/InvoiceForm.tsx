@@ -188,7 +188,7 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
   };
 
   const inputClass = (error?: string) =>
-    `w-full rounded-md border px-5 py-3 text-sm font-bold text-invoice-text-light transition-colors outline-none dark:bg-[#1E2139] dark:text-white ${
+    `w-full rounded-md border px-5 h-[48px] text-sm font-bold text-invoice-text-light transition-colors outline-none dark:bg-[#1E2139] dark:text-white ${
       error ? 'border-destructive focus:border-destructive' : 'border-[#DFE3FA] hover:border-primary focus:border-primary dark:border-[#252945] dark:hover:border-primary dark:focus:border-primary'
     }`;
 
@@ -343,7 +343,7 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
                     <CalendarIcon className="h-4 w-4 text-primary opacity-100" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white dark:bg-[#252945] border-none shadow-xl">
+                <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-white dark:bg-[#252945] border-none shadow-xl">
                   <Calendar
                     mode="single"
                     selected={invoiceDate ? new Date(invoiceDate) : undefined}
@@ -353,17 +353,25 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
                       }
                     }}
                     initialFocus
-                    className="p-4"
+                    className="p-4 w-full"
+                    classNames={{
+                      root: "w-full",
+                      months: "w-full flex flex-col relative",
+                      month: "w-full flex flex-col gap-4",
+                      table: "w-full border-collapse",
+                      head_row: "flex w-full justify-between",
+                      row: "flex w-full justify-between mt-2"
+                    }}
                   />
                 </PopoverContent>
               </Popover>
             </Field>
             <Field label="Payment Terms" error={errors.paymentTerms}>
               <Select value={String(paymentTerms)} onValueChange={(val) => setPaymentTerms(Number(val))}>
-                <SelectTrigger className={cn(inputClass(errors.paymentTerms), "flex items-center justify-between h-auto [&>svg]:text-primary [&>svg]:opacity-100")}>
+                <SelectTrigger className={cn(inputClass(errors.paymentTerms), "flex items-center justify-between [&>svg]:text-primary [&>svg]:opacity-100")}>
                   <SelectValue placeholder="Select Payment Terms" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="bg-white dark:bg-[#252945] rounded-lg border-none shadow-card z-50">
+                <SelectContent position="popper" className="w-[var(--radix-select-trigger-width)] bg-white dark:bg-[#252945] rounded-lg border-none shadow-card z-50">
                   {paymentTermsOptions.map((opt) => (
                     <SelectItem
                       key={opt.value}
