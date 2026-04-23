@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { useInvoices } from '@/hooks/useInvoices';
 import { Sidebar } from '@/components/Sidebar';
@@ -8,13 +8,15 @@ import { InvoiceFormPage } from '@/pages/InvoiceFormPage';
 
 function App() {
   const invoicesHook = useInvoices();
+  const location = useLocation();
+  const backgroundLocation = location.state?.backgroundLocation;
 
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-invoice-bg-light transition-colors dark:bg-invoice-bg-dark">
         <Sidebar />
         <main className="pt-20 md:pl-[103px] md:pt-0">
-          <Routes>
+          <Routes location={backgroundLocation || location}>
             <Route
               path="/"
               element={<InvoiceList invoicesHook={invoicesHook} />}
@@ -32,6 +34,19 @@ function App() {
               element={<InvoiceFormPage invoicesHook={invoicesHook} />}
             />
           </Routes>
+          
+          {backgroundLocation && (
+            <Routes>
+              <Route
+                path="/invoice/new"
+                element={<InvoiceFormPage invoicesHook={invoicesHook} />}
+              />
+              <Route
+                path="/invoice/:id/edit"
+                element={<InvoiceFormPage invoicesHook={invoicesHook} />}
+              />
+            </Routes>
+          )}
         </main>
       </div>
     </ThemeProvider>

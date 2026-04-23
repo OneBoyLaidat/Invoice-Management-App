@@ -21,26 +21,22 @@ export function InvoiceFormPage({ invoicesHook }: InvoiceFormPageProps) {
         ...data,
         status,
       });
-      navigate(`/invoice/${invoice.id}`);
+      navigate(-1);
     } else {
-      const newInvoice = addInvoice(data, status);
-      navigate(`/invoice/${newInvoice.id}`);
+      addInvoice(data, status);
+      navigate(-1);
     }
   };
 
   const handleDiscard = () => {
-    if (isEdit && invoice) {
-      navigate(`/invoice/${invoice.id}`);
-    } else {
-      navigate('/');
-    }
+    navigate(-1);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-slide-in">
+    <div className="fixed inset-0 z-40 flex">
       {/* Backdrop */}
       <div
-        className="hidden bg-black/50 md:block md:flex-1"
+        className="absolute inset-0 bg-black/50 transition-opacity md:block animate-fade-in"
         onClick={handleDiscard}
         role="button"
         tabIndex={0}
@@ -52,7 +48,7 @@ export function InvoiceFormPage({ invoicesHook }: InvoiceFormPageProps) {
         aria-label="Close form"
       />
       {/* Form Panel */}
-      <div className="flex left-0 h-full w-full flex-col bg-white dark:bg-invoice-bg-dark md:w-[720px] md:rounded-r-2xl lg:w-[780px]">
+      <div className="relative z-10 flex h-full w-full flex-col bg-white dark:bg-invoice-bg-dark md:w-[720px] md:pl-[103px] md:rounded-r-2xl lg:w-[780px] animate-slide-in">
         <InvoiceForm
           invoice={invoice}
           onSave={handleSave}

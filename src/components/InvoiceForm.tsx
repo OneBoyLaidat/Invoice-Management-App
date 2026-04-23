@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import type { Invoice, InvoiceStatus, InvoiceItem } from '@/types/invoice';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -126,9 +131,9 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
       newErrors.items = 'An item must be added';
     } else {
       items.forEach((item, index) => {
-        if (!item.name.trim()) newErrors[`itemName_${index}`] = 'required';
-        if (item.quantity <= 0) newErrors[`itemQty_${index}`] = 'must be > 0';
-        if (item.price < 0) newErrors[`itemPrice_${index}`] = 'must be >= 0';
+        if (!item.name.trim()) newErrors[`itemName_${index}`] = "can't be empty";
+        if (item.quantity <= 0) newErrors[`itemQty_${index}`] = "can't be empty";
+        if (item.price < 0) newErrors[`itemPrice_${index}`] = "can't be empty";
       });
     }
     
@@ -176,13 +181,22 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
     onSave(formData, status);
   };
 
-  const inputClass = (error?: string, p0?: string) =>
-    `w-full rounded-md border px-5 py-3 text-sm font-bold text-invoice-text-light transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:bg-[#1E2139] dark:text-white ${
-      error ? 'border-destructive' : 'border-[#DFE3FA] dark:border-[#252945]'
+  const inputClass = (error?: string) =>
+    `w-full rounded-md border px-5 py-3 text-sm font-bold text-invoice-text-light transition-colors outline-none dark:bg-[#1E2139] dark:text-white ${
+      error ? 'border-destructive focus:border-destructive' : 'border-[#DFE3FA] hover:border-primary focus:border-primary dark:border-[#252945] dark:hover:border-primary dark:focus:border-primary'
     }`;
 
-  const labelClass = 'mb-2 block text-xs text-invoice-textSecondary dark:text-[#DFE3FA]';
-  const errorClass = 'mt-1 text-xs text-destructive';
+  const labelClass = 'text-xs text-invoice-textSecondary dark:text-[#DFE3FA]';
+
+  const Field = ({ label, error, children }: { label: string, error?: string, children: React.ReactNode }) => (
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between mb-2">
+        <label className={`text-xs ${error ? 'text-destructive dark:text-destructive' : 'text-invoice-textSecondary dark:text-[#DFE3FA]'}`}>{label}</label>
+        {error && <span className="text-[10px] font-semibold text-destructive">{error}</span>}
+      </div>
+      {children}
+    </div>
+  );
 
   return (
     <div className="flex h-full flex-col">
@@ -213,46 +227,40 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
         <section className="mb-12">
           <h2 className="mb-6 text-sm font-bold text-primary">Bill From</h2>
           <div className="space-y-6">
-            <div>
-              <label className={labelClass}>Street Address</label>
+            <Field label="Street Address" error={errors.senderStreet}>
               <input
                 type="text"
                 value={senderStreet}
                 onChange={(e) => setSenderStreet(e.target.value)}
                 className={inputClass(errors.senderStreet)}
               />
-              {errors.senderStreet && <p className={errorClass}>{errors.senderStreet}</p>}
-            </div>
+            </Field>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-              <div>
-                <label className={labelClass}>City</label>
+              <Field label="City" error={errors.senderCity}>
                 <input
                   type="text"
                   value={senderCity}
                   onChange={(e) => setSenderCity(e.target.value)}
                   className={inputClass(errors.senderCity)}
                 />
-                {errors.senderCity && <p className={errorClass}>{errors.senderCity}</p>}
-              </div>
-              <div>
-                <label className={labelClass}>Post Code</label>
+              </Field>
+              <Field label="Post Code" error={errors.senderPostCode}>
                 <input
                   type="text"
                   value={senderPostCode}
                   onChange={(e) => setSenderPostCode(e.target.value)}
                   className={inputClass(errors.senderPostCode)}
                 />
-                {errors.senderPostCode && <p className={errorClass}>{errors.senderPostCode}</p>}
-              </div>
+              </Field>
               <div className="col-span-2 md:col-span-1">
-                <label className={labelClass}>Country</label>
-                <input
-                  type="text"
-                  value={senderCountry}
-                  onChange={(e) => setSenderCountry(e.target.value)}
-                  className={inputClass(errors.senderCountry)}
-                />
-                {errors.senderCountry && <p className={errorClass}>{errors.senderCountry}</p>}
+                <Field label="Country" error={errors.senderCountry}>
+                  <input
+                    type="text"
+                    value={senderCountry}
+                    onChange={(e) => setSenderCountry(e.target.value)}
+                    className={inputClass(errors.senderCountry)}
+                  />
+                </Field>
               </div>
             </div>
           </div>
@@ -262,18 +270,15 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
         <section className="mb-12">
           <h2 className="mb-6 text-sm font-bold text-primary">Bill To</h2>
           <div className="space-y-6">
-            <div>
-              <label className={labelClass}>Client's Name</label>
+            <Field label="Client's Name" error={errors.clientName}>
               <input
                 type="text"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 className={inputClass(errors.clientName)}
               />
-              {errors.clientName && <p className={errorClass}>{errors.clientName}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Client's Email</label>
+            </Field>
+            <Field label="Client's Email" error={errors.clientEmail}>
               <input
                 type="email"
                 value={clientEmail}
@@ -281,48 +286,41 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
                 placeholder="e.g. email@example.com"
                 className={inputClass(errors.clientEmail)}
               />
-              {errors.clientEmail && <p className={errorClass}>{errors.clientEmail}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Street Address</label>
+            </Field>
+            <Field label="Street Address" error={errors.clientStreet}>
               <input
                 type="text"
                 value={clientStreet}
                 onChange={(e) => setClientStreet(e.target.value)}
                 className={inputClass(errors.clientStreet)}
               />
-              {errors.clientStreet && <p className={errorClass}>{errors.clientStreet}</p>}
-            </div>
+            </Field>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-              <div>
-                <label className={labelClass}>City</label>
+              <Field label="City" error={errors.clientCity}>
                 <input
                   type="text"
                   value={clientCity}
                   onChange={(e) => setClientCity(e.target.value)}
                   className={inputClass(errors.clientCity)}
                 />
-                {errors.clientCity && <p className={errorClass}>{errors.clientCity}</p>}
-              </div>
-              <div>
-                <label className={labelClass}>Post Code</label>
+              </Field>
+              <Field label="Post Code" error={errors.clientPostCode}>
                 <input
                   type="text"
                   value={clientPostCode}
                   onChange={(e) => setClientPostCode(e.target.value)}
                   className={inputClass(errors.clientPostCode)}
                 />
-                {errors.clientPostCode && <p className={errorClass}>{errors.clientPostCode}</p>}
-              </div>
+              </Field>
               <div className="col-span-2 md:col-span-1">
-                <label className={labelClass}>Country</label>
-                <input
-                  type="text"
-                  value={clientCountry}
-                  onChange={(e) => setClientCountry(e.target.value)}
-                  className={inputClass(errors.clientCountry)}
-                />
-                {errors.clientCountry && <p className={errorClass}>{errors.clientCountry}</p>}
+                <Field label="Country" error={errors.clientCountry}>
+                  <input
+                    type="text"
+                    value={clientCountry}
+                    onChange={(e) => setClientCountry(e.target.value)}
+                    className={inputClass(errors.clientCountry)}
+                  />
+                </Field>
               </div>
             </div>
           </div>
@@ -331,45 +329,58 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
         {/* Invoice Details */}
         <section className="mb-12">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div>
-              <label className={labelClass}>Invoice Date</label>              
-              <input
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                className={`${inputClass(errors.invoiceDate)} dark:[color-scheme:dark]`}
-              />
-              {errors.invoiceDate && <p className={errorClass}>{errors.invoiceDate}</p>}
-            </div>
-            <div>
-              <label className={labelClass}>Payment Terms</label>
-              <select
-                value={paymentTerms}
-                onChange={(e) => setPaymentTerms(Number(e.target.value))}
-                className={`${inputClass()} cursor-pointer`}
-              >
-                {paymentTermsOptions.map((opt) => (
-                  <option 
-                    key={opt.value} 
-                    value={opt.value} 
-                    className="bg-white text-invoice-text-light dark:bg-[#1E2139] dark:text-[#DFE3FA]"
-                  >
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Field label="Invoice Date" error={errors.invoiceDate}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(inputClass(errors.invoiceDate), "text-left flex items-center justify-between")}>
+                    {invoiceDate ? format(new Date(invoiceDate), "dd MMM yyyy") : "Pick a date"}
+                    <CalendarIcon className="h-4 w-4 text-primary opacity-100" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 bg-white dark:bg-[#252945] border-none shadow-xl">
+                  <Calendar
+                    mode="single"
+                    selected={invoiceDate ? new Date(invoiceDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setInvoiceDate(format(date, "yyyy-MM-dd"));
+                      }
+                    }}
+                    initialFocus
+                    className="p-4"
+                  />
+                </PopoverContent>
+              </Popover>
+            </Field>
+            <Field label="Payment Terms" error={errors.paymentTerms}>
+              <Select value={String(paymentTerms)} onValueChange={(val) => setPaymentTerms(Number(val))}>
+                <SelectTrigger className={cn(inputClass(), "flex items-center justify-between h-auto [&>svg]:text-primary [&>svg]:opacity-100")}>
+                  <SelectValue placeholder="Select Payment Terms" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-[#252945] rounded-lg border-none shadow-card z-50">
+                  {paymentTermsOptions.map((opt) => (
+                    <SelectItem
+                      key={opt.value}
+                      value={String(opt.value)}
+                      className="font-bold text-invoice-text-light dark:text-[#DFE3FA] focus:text-primary dark:focus:text-primary border-b border-[#DFE3FA] dark:border-[#1E2139] last:border-0 cursor-pointer px-6 py-4"
+                    >
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
           </div>
           <div className="mt-6">
-            <label className={labelClass}>Project Description</label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g. Graphic Design Service"
-              className={inputClass(errors.description)}
-            />
-            {errors.description && <p className={errorClass}>{errors.description}</p>}
+            <Field label="Project Description" error={errors.description}>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="e.g. Graphic Design Service"
+                className={inputClass(errors.description)}
+              />
+            </Field>
           </div>
         </section>
 
@@ -391,7 +402,10 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
               
               {/* Name Input */}
               <div className="flex flex-col">
-                <label className={`${labelClass} md:hidden`}>Item Name</label>
+                <div className="flex items-center justify-between mb-2 md:hidden">
+                  <label className={errors[`itemName_${index}`] ? 'text-xs text-destructive' : labelClass}>Item Name</label>
+                  {errors[`itemName_${index}`] && <span className="text-[10px] font-semibold text-destructive">{errors[`itemName_${index}`]}</span>}
+                </div>
                 <input
                   type="text"
                   value={item.name}
@@ -405,7 +419,10 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
                 
                 {/* Qty Input */}
                 <div className="flex w-[60px] flex-col md:w-auto">
-                  <label className={`${labelClass} md:hidden`}>Qty.</label>
+                  <div className="flex items-center justify-between mb-2 md:hidden">
+                    <label className={errors[`itemQty_${index}`] ? 'text-xs text-destructive' : labelClass}>Qty.</label>
+                    {errors[`itemQty_${index}`] && <span className="text-[10px] font-semibold text-destructive">{errors[`itemQty_${index}`]}</span>}
+                  </div>
                   <input
                     type="number"
                     min="1"
@@ -417,14 +434,17 @@ export function InvoiceForm({ invoice, onSave, onDiscard }: InvoiceFormProps) {
 
                 {/* Price Input */}
                 <div className="flex flex-1 flex-col md:w-auto">
-                  <label className={`${labelClass} md:hidden`}>Price</label>
+                  <div className="flex items-center justify-between mb-2 md:hidden">
+                    <label className={errors[`itemPrice_${index}`] ? 'text-xs text-destructive' : labelClass}>Price</label>
+                    {errors[`itemPrice_${index}`] && <span className="text-[10px] font-semibold text-destructive">{errors[`itemPrice_${index}`]}</span>}
+                  </div>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
                     value={item.price}
                     onChange={(e) => updateItem(item.id, 'price', Math.max(0, parseFloat(e.target.value) || 0))}
-                    className={inputClass(errors[`it      emPrice_${index}`])}
+                    className={inputClass(errors[`itemPrice_${index}`])}
                   />
                 </div>
 

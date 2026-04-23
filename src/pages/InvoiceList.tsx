@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useInvoices } from '@/hooks/useInvoices';
 import type { StatusFilter } from '@/types/invoice';
@@ -13,6 +13,7 @@ interface InvoiceListProps {
 
 export function InvoiceList({ invoicesHook }: InvoiceListProps) {
   const { invoices } = invoicesHook;
+  const location = useLocation();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const filteredInvoices = useMemo(() => {
@@ -53,6 +54,7 @@ export function InvoiceList({ invoicesHook }: InvoiceListProps) {
 
           <Link
             to="/invoice/new"
+            state={{ backgroundLocation: location }}
             className="group flex items-center gap-2 rounded-full bg-primary py-2 pl-2 pr-4 text-sm font-bold text-white transition-colors hover:bg-primary-light md:gap-4 md:pl-2 md:pr-6"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">

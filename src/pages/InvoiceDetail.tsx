@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useInvoices } from '@/hooks/useInvoices';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -13,6 +13,7 @@ export function InvoiceDetail({ invoicesHook }: InvoiceDetailProps) {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getInvoice, deleteInvoice, markAsPaid } = invoicesHook;
+  const location = useLocation();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const invoice = id ? getInvoice(id) : undefined;
@@ -75,6 +76,7 @@ export function InvoiceDetail({ invoicesHook }: InvoiceDetailProps) {
           {canEdit && (
             <Link
               to={`/invoice/${invoice.id}/edit`}
+              state={{ backgroundLocation: location }}
               className="rounded-full bg-[#F9FAFE] px-6 py-3 text-sm font-bold text-invoice-textMuted transition-colors hover:bg-[#DFE3FA] dark:bg-[#252945] dark:text-[#DFE3FA] dark:hover:bg-[#1E2139]"
             >
               Edit
@@ -239,6 +241,7 @@ export function InvoiceDetail({ invoicesHook }: InvoiceDetailProps) {
         {canEdit && (
           <Link
             to={`/invoice/${invoice.id}/edit`}
+            state={{ backgroundLocation: location }}
             className="rounded-full bg-[#F9FAFE] px-6 py-3 text-sm font-bold text-invoice-textMuted"
           >
             Edit
