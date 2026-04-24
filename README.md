@@ -5,7 +5,9 @@ Welcome to the Invoice Management App! This is a complete, fully-functional web 
 link to live demo: [Invoice Management App](https://invoice-management-app-iota.vercel.app/)
 
 ## Introduction
+
 The Invoice Management App allows users to:
+
 - View a list of all their invoices with status indicators (Draft, Pending, Paid).
 - Filter invoices by their current status.
 - Create new invoices with a dynamic itemized list.
@@ -21,18 +23,24 @@ To run this project locally, follow these simple steps:
 
 1. **Prerequisites**: Ensure you have Node.js installed (v18 or higher recommended).
 2. **Clone the repository** (if applicable):
+
    ```bash
    git clone <repository-url>
    cd "Invoice Management App"
    ```
+
 3. **Install Dependencies**:
+
    ```bash
    npm install
    ```
+
 4. **Start the Development Server**:
+
    ```bash
    npm run dev
    ```
+
 5. **View the App**: Open your browser and navigate to `http://localhost:5173`.
 
 ## Architecture Explanation
